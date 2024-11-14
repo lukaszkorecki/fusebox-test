@@ -27,13 +27,13 @@
   (is (= {:status 200 :body {:msg "finally working"}}
          (ft/req-w-retry {:req {:resp :srv-err}
                           :track-fn update-attempt-count})))
-
-  (is (= 3 @attempts)))
+  (is (= 4 @attempts)))
 
 (deftest exc-retries-test
-  (is (= {:status 200 :body {:msg "finally working"}}
-         (ft/req-w-retry {:req {:resp :exc
-                                :exc-class (java.net.UnknownHostException.)}
-                          :track-fn update-attempt-count})))
+  (is (= :com.potetm.fusebox.error/retries-exhausted,
+         (-> (ft/req-w-retry {:req {:resp :exc
+                                    :exc-class (java.net.UnknownHostException.)}
+                              :track-fn update-attempt-count})
+             :com.potetm.fusebox/error)))
 
-  (is (= 4 @attempts)))
+  (is (= 6 @attempts)))
