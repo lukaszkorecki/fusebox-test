@@ -36,7 +36,11 @@
 
 (def retry-opts
   (retry/init {::retry/retry? (fn [n _duration-ms _exc]
-                                (<= n 5))
+                                (if (and
+                                     (instance? Throwable _exc)
+                                     (-> (ex-data _exc) :ignore?))
+                                  false
+                                  (<= n 5)))
 
                ::retry/success? (fn [{:keys [status] :as _res}]
                                   (not (>= status 500)))

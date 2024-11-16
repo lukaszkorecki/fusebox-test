@@ -81,6 +81,17 @@
            (-> (ft/req-w-retry {:req {:resp :exc
                                       :exc exc}
                                 :track-fn update-attempt-count})
-               (update :data #(dissoc % ::retry/exec-duration-ms))))
+               (update :data #(dissoc % ::retry/exec-duration-ms)))))
 
-        (is (= 6 @attempts)))))
+    (is (= 6 @attempts))))
+
+(deftest will-not-retry-on-certain-exceptions-test
+  (let [exc (ex-info "ignore me" {:ignore? true})]
+    (is (= exc
+
+           (-> (ft/req-w-retry {:req {:resp :exc
+                                      :exc exc}
+                                :track-fn update-attempt-count})
+               :cause)))
+
+    (is (= 1 @attempts))))
